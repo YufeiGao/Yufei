@@ -1,0 +1,43 @@
+//Given a string containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.
+
+//The brackets must close in the correct order, "()" and "()[]{}" are all valid but "(]" and "([)]" are not.
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+class Solution {
+public:
+	bool isValid(string s) {
+		int length = size(s);
+		cout << length << endl;
+		vector <char> bracket;
+		for (int i = 0; i < length; i++)
+			if ((s[i] == '[') || (s[i] == ']') || (s[i] == '{') || (s[i] == '}') || (s[i] == '(') || (s[i] == ')'))
+			{
+				bracket.push_back(s[i]);
+			}
+		for (int i = 0; i < (bracket.size()-1); i++) {		
+			if ((bracket[i] == '[') && ((bracket[i + 1] == '[') || (bracket[i + 1] == '{') || (bracket[i + 1] == '(')))
+				continue;
+			else if ((bracket[i] == '{') && ((bracket[i + 1] == '[') || (bracket[i + 1] == '{') || (bracket[i + 1] == '(')))
+				continue;
+			else if ((bracket[i] == '{') && ((bracket[i + 1] == '[') || (bracket[i + 1] == '{') || (bracket[i + 1] == '(')))
+				continue;
+			else if ((bracket[i] == '[') && (bracket[i + 1] != ']'))
+				return false;
+			else if ((bracket[i] == '{') && (bracket[i + 1] != '}'))
+				return false;
+			else if ((bracket[i] == '(') && (bracket[i + 1] != ')'))
+				return false;
+			else return true;
+		}
+	}
+};
+int main() {
+	string s;
+	s = "[[([1232]]}}";
+	Solution sol;
+	cout << sol.isValid(s);
+	getchar();
+	return 0;
+}
