@@ -1,0 +1,168 @@
+//  N Queens Problem
+//
+//  Hint Created by Ramavarapu Sreenivas on 8/23/16.
+//
+//  Assignment for MSFE program, UIUC
+//  Finished by Yufei Gao on 9/3/17
+#include <iostream>
+class Board
+{
+	// private data member: size of the board
+	int size;
+	// pointer-to-pointer initialization of the board
+	int **chess_board;
+	// private member function:  returns 'false' if
+	// the (row, col) position is not safe.
+	bool is_this_position_safe(int row, int col)
+	{
+		int sum = 0; // use the sum to determine
+		int c = col;
+		int r = row;
+		for (int i = 0; i < size; i++)
+			sum += chess_board[i][col]; // sum of the column = col
+		for (int j = 0; j < size; j++)
+			sum += chess_board[row][j]; // sum of the row = row
+		while (1)						// the left-upper dignal
+		{
+			if ((0 == r) || (0 == c))
+				break;
+			else
+			{
+				sum += chess_board[r - 1][c - 1];
+				r--;
+				c--;
+			}
+		}
+		r = row;
+		c = col;
+		while (1)						// the left-bottom dignal
+		{
+			if (((size - 1) == r) || (0 == c))
+				break;
+			else
+			{
+				sum += chess_board[r + 1][c - 1];
+				r++;
+				c--;
+			}
+		}
+		r = row;
+		c = col;
+		while (1)						// the right-upper dignal
+		{
+			if ((0 == r) || ((size - 1) == c))
+				break;
+			else
+			{
+				sum += chess_board[r - 1][c + 1];
+				r--;
+				c++;
+			}
+		}
+		r = row;
+		c = col;
+		while (1)						// the right-bottom dignal
+		{
+			if (((size - 1) == r) || ((size - 1) == c))
+				break;
+			else
+			{
+				sum += chess_board[r + 1][c + 1];
+				r++;
+				c++;
+			}
+		}
+		if (0 == sum)
+			return true;
+		else
+			return false;
+	}
+		// write the appropriate code on your own that returns
+		// "true" if the (row,col) position is safe.  If it is
+		// unsafe (i.e. some other queen can threaten this position)
+		// return "false"
+	// private member function: initializes the (n x n) chessboard
+	void initialize(int n)
+	{
+		size = n;
+		chess_board = new int*[size];
+		for (int i = 0; i < size; i++)
+			chess_board[i] = new int[size];
+		for (int i = 0; i < size; i++)
+			for (int j = 0; j < size; j++)
+				chess_board[i][j] = 0;
+		
+		// write the appropriate code that uses the pointer-to-pointer
+		// method to initialize the (n x n) chessboard.  Once initialized,
+		// put zeros in all entries.  Later on, if you placed a queen in
+		// the (i,j)-th position, then chessboard[i][j] will be 1.
+	}
+
+	// private member function: prints the board position
+	void print_board()
+	{
+		std::cout << size << "-Queens Problem Solution" << std::endl;
+		for (int j = 0; j < size; j++)
+		{
+			for (int i = 0; i < size; i++)
+			{
+				if (0 == chess_board[i][j])
+					std::cout << "- ";
+				else
+					std::cout << "Q ";
+			}
+			std::cout << std::endl;
+		}
+		std::cout << "---------------------------------------" << std::endl;
+		// write the appropriate code here to print out the solved
+		// board as shown in the assignment description
+
+	}
+
+	// private member function: recursive backtracking
+	bool solve(int col)
+	{
+		if (col >= size)
+			return true;
+		else
+		{
+			for (int row = 0; row <= (size - 1); row++)
+			{
+				if (is_this_position_safe(row, col))
+				{
+					chess_board[row][col] = 1;
+					if (solve(col + 1))
+						return true;
+					else
+						chess_board[row][col] = 0;
+				}
+			}
+		}
+		return false;
+	}
+		// implement the recursive backtracking procedure described in
+		// pseudocode format in figure 1 of the description of the first
+		// programming assignment
+public:
+	// Solves the n-Queens problem by (recursive) backtracking
+	void nQueens(int n)
+	{
+		initialize(n);
+		if (solve(0))
+			print_board();
+		else
+			std::cout << "There is no solution to the " << n << "-Queens Problem" << std::endl;
+	}
+};
+int main(int argc, char * const argv[])
+{
+	Board x;
+	int board_size;
+	std::cout << "Enter the number n: ";
+	std::cin >> board_size;
+	x.nQueens(board_size);
+	getchar();
+	getchar();
+	getchar();
+	return 0;
+}
