@@ -1,0 +1,33 @@
+class Solution {
+public:
+    vector<int> plusOne(vector<int>& digits) {
+		int pos = -1;
+		for (int i = (digits.size()-1); i >= 0; i--)
+		{
+			if (digits[i] == 9)
+				continue;
+			else
+            {
+                pos = i;
+                break;
+            }
+		}
+		if (-1 == pos)
+		{
+			digits[0] = 1;
+			for (int j = 1; j < digits.size(); j++)
+				digits[j] = 0;
+			digits.push_back(0);
+		}
+		else if ((digits.size() - 1) == pos) {
+			digits.back()++;
+		}
+		else
+		{
+			digits[pos]++;
+			for (int k = (pos + 1); k < digits.size(); k++)
+				digits[k] = 0;
+		}
+		return digits;
+	}
+};
