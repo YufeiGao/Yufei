@@ -1,0 +1,295 @@
+#ifndef sudoku
+#define sudoku
+#include <vector>
+#include <fstream>
+#include <iostream>
+using std::vector;
+using namespace std;
+class Sudoku
+{
+	// Private
+	int puzzle[9][9];
+	// Private member function that checks if the named row is valid
+	int count = 0; // count the number of solutions
+	bool row_valid(int row)
+	{
+		int i, j;
+		int judge = 1;
+		for (i = 0; i < 8; i++)
+			for (j = (i + 1); j < 9; j++) // check if entries after i is equal to i
+				if ((puzzle[row][j] != 0) && (puzzle[row][i] != 0)) // if these entires are not empty
+					if (puzzle[row][j] == puzzle[row][i])
+					{
+						judge = 0;
+						break;
+					}
+		if (judge)
+			return true;
+		else
+			return false;
+		// write code that checks if "row" is valid
+	}
+
+	// Private member function that checks if the named column is valid
+	bool col_valid(int col)
+	{
+		int i, j;
+		int judge = 1;
+		for (i = 0; i < 8; i++)
+			for (j = (i + 1); j < 9; j++) // check if entries after i is equal to i
+				if ((puzzle[j][col] != 0) && (puzzle[i][col] != 0)) // if these entires are not empty
+					if (puzzle[j][col] == puzzle[i][col])
+					{
+						judge = 0;
+						break;
+					}
+		if (judge)
+			return true;
+		else
+			return false;// check validity of "col" 
+	}
+
+	// Private member function that checks if the named 3x3 block is valid
+	bool block_valid(int row, int col)
+	{
+		vector <int> block_entry; // use this to contain 9 entries in a block
+		int judge = 1;
+		int i, j;
+		if ((row >= 0) && (row <= 2)) // first 3 row's blocks
+		{
+			if ((col >= 0) && (col <= 2)) //(1,1) block
+			{
+				for (i = 0; i <= 2; i++)
+					for (j = 0; j <= 2; j++)
+						block_entry.push_back(puzzle[i][j]);
+				for (i = 0; i <= 7; i++)
+					for (j = (i + 1); j <= 8; j++)
+						if ((block_entry[i] != 0) && (block_entry[j] != 0))
+							if (block_entry[j] == block_entry[i])
+							{
+								judge = 0;
+								break;
+							}
+			}
+			if ((col >= 3) && (col <= 5)) //(1,2) block
+			{
+				for (i = 0; i <= 2; i++)
+					for (j = 3; j <= 5; j++)
+						block_entry.push_back(puzzle[i][j]);
+				for (i = 0; i <= 7; i++)
+					for (j = (i + 1); j <= 8; j++)
+						if ((block_entry[i] != 0) && (block_entry[j] != 0))
+							if (block_entry[j] == block_entry[i])
+							{
+								judge = 0;
+								break;
+							}
+			}
+			if ((col >= 6) && (col <= 8)) //(1,3) block
+			{
+				for (i = 0; i <= 2; i++)
+					for (j = 6; j <= 8; j++)
+						block_entry.push_back(puzzle[i][j]);
+				for (i = 0; i <= 7; i++)
+					for (j = (i + 1); j <= 8; j++)
+						if ((block_entry[i] != 0) && (block_entry[j] != 0))
+							if (block_entry[j] == block_entry[i])
+							{
+								judge = 0;
+								break;
+							}
+			}
+		}
+		if ((row >= 3) && (row <= 5)) // next 3 row's blocks
+		{
+			if ((col >= 0) && (col <= 2)) //(2,1) block
+			{
+				for (i = 3; i <= 5; i++)
+					for (j = 0; j <= 2; j++)
+						block_entry.push_back(puzzle[i][j]);
+				for (i = 0; i <= 7; i++)
+					for (j = (i + 1); j <= 8; j++)
+						if ((block_entry[i] != 0) && (block_entry[j] != 0))
+							if (block_entry[j] == block_entry[i])
+							{
+								judge = 0;
+								break;
+							}
+			}
+			if ((col >= 3) && (col <= 5)) //(2,2) block
+			{
+				for (i = 3; i <= 5; i++)
+					for (j = 3; j <= 5; j++)
+						block_entry.push_back(puzzle[i][j]);
+				for (i = 0; i <= 7; i++)
+					for (j = (i + 1); j <= 8; j++)
+						if ((block_entry[i] != 0) && (block_entry[j] != 0))
+							if (block_entry[j] == block_entry[i])
+							{
+								judge = 0;
+								break;
+							}
+			}
+			if ((col >= 6) && (col <= 8)) //(2,3) block
+			{
+				for (i = 3; i <= 5; i++)
+					for (j = 6; j <= 8; j++)
+						block_entry.push_back(puzzle[i][j]);
+				for (i = 0; i <= 7; i++)
+					for (j = (i + 1); j <= 8; j++)
+						if ((block_entry[i] != 0) && (block_entry[j] != 0))
+							if (block_entry[j] == block_entry[i])
+							{
+								judge = 0;
+								break;
+							}
+			}
+		}
+		if ((row >= 6) && (row <= 8)) // last 3 row's blocks
+		{
+			if ((col >= 0) && (col <= 2)) //(3,1) block
+			{
+				for (i = 6; i <= 8; i++)
+					for (j = 0; j <= 2; j++)
+						block_entry.push_back(puzzle[i][j]);
+				for (i = 0; i <= 7; i++)
+					for (j = (i + 1); j <= 8; j++)
+						if ((block_entry[i] != 0) && (block_entry[j] != 0))
+							if (block_entry[j] == block_entry[i])
+							{
+								judge = 0;
+								break;
+							}
+			}
+			if ((col >= 3) && (col <= 5)) //(3,2) block
+			{
+				for (i = 6; i <= 8; i++)
+					for (j = 3; j <= 5; j++)
+						block_entry.push_back(puzzle[i][j]);
+				for (i = 0; i <= 7; i++)
+					for (j = (i + 1); j <= 8; j++)
+						if ((block_entry[i] != 0) && (block_entry[j] != 0))
+							if (block_entry[j] == block_entry[i])
+							{
+								judge = 0;
+								break;
+							}
+			}
+			if ((col >= 6) && (col <= 8)) //(3,3) block
+			{
+				for (i = 6; i <= 8; i++)
+					for (j = 6; j <= 8; j++)
+						block_entry.push_back(puzzle[i][j]);
+				for (i = 0; i <= 7; i++)
+					for (j = (i + 1); j <= 8; j++)
+						if ((block_entry[i] != 0) && (block_entry[j] != 0))
+							if (block_entry[j] == block_entry[i])
+							{
+								judge = 0;
+								break;
+							}
+			}
+		}
+		if (judge)
+			return true;
+		else
+			return false;
+		// check 3 x 3 block validity 
+	}
+
+	// Public member function that reads the incomplete puzzle
+	// we are not doing any checks on the input puzzle -- that is,
+	// we are assuming they are indeed valid
+public:
+	void read_puzzle(int argc, char * const argv[])
+	{
+		int value_just_read_from_file;
+		vector <int> P;
+		ifstream input_file(argv[1]);
+		if (input_file.is_open())
+		{
+			while (input_file >> value_just_read_from_file)
+			{
+				P.push_back(value_just_read_from_file);
+			}
+		}
+		else
+		{
+			std::cout << "input file does not exist" << std::endl;
+		}
+		for (int i = 0; i < 9; i++)
+			for (int j = 0; j < 9; j++)
+				puzzle[i][j] = P[j + i * 9];
+
+
+		// write code that reads the input puzzle using the 
+		// guidelines of figure 23 of the bootcamp material
+	}
+
+	// Public member function that prints the puzzle when called
+	void print_puzzle()
+	{
+		std::cout << std::endl << "Board Position and solution: " << count <<std::endl;
+		for (int i = 0; i < 9; i++)
+		{
+			for (int j = 0; j < 9; j++)
+			{
+				// check if we have a legitimate integer between 1 and 9
+				if ((puzzle[i][j] >= 1) && (puzzle[i][j] <= 9))
+				{
+					// printing initial value of the puzzle with some formatting
+					std::cout << puzzle[i][j] << " ";
+				}
+				else {
+					// printing initial value of the puzzle with some formatting
+					std::cout << "X ";
+				}
+			}
+			std::cout << std::endl;
+		}
+		count++;
+	}
+
+	// Public member function that (recursively) implements the brute-force 
+	// search for possible solutions to the incomplete Sudoku puzzle
+	bool Solve(int row, int col)
+	{
+
+		int judge = 1;
+		int i, j, k;
+		int temp_i, temp_j;
+		for (temp_i = 0; temp_i < 9; temp_i++)
+			for (temp_j = 0; temp_j < 9; temp_j++)
+				if (0 == puzzle[temp_i][temp_j])
+				{
+					judge = 0;
+					i = temp_i;
+					j = temp_j; // record current position
+					goto breakloop;
+				}		
+		print_puzzle();
+		return true;
+	breakloop:
+		{	
+			for (k = 1; k <= 9; k++)
+			{
+				puzzle[i][j] = k;
+				if ((row_valid(i)) && (col_valid(j)) && (block_valid(i, j)) && (Solve(i, j)))
+				{
+
+					//return true;
+				}
+			}
+
+			puzzle[i][j] = 0;
+			return false;
+		}
+		// this part of the code identifies the row and col number of the 
+		// first incomplete (i.e. 0) entry in the puzzle.  If the puzzle has
+		// no zeros, the variable row will be 9 => the puzzle is done, as 
+		// each entry is row-, col- and block-valid...
+
+		// use the pseudo code of figure 3 of the description
+	}
+};
+#endif
