@@ -1,0 +1,129 @@
+#ifndef ALICE_AND_BOB
+#define ALICE_AND_BOB
+
+#include <cmath>
+#include <fstream>
+using namespace std;
+class I_have_nothing_apropos_for_this_class
+{
+private:
+	double alice_probability, bob_probability;
+	double theo_val[100], simu_val[100];//these two arrays are used to store theoratical and simulation value respectively
+										// private member function: uniform RV generator
+	double get_uniform()
+	{
+		// write the appropriate code here
+		return (((double)rand()) / RAND_MAX);
+	}
+
+	// private member function: nCi (i.e. n-take-i) 
+	int take(int n, int i)
+	{
+		// write a **RECURSIVE** implementation of n-take-i. 
+		// If you made it non-recurisive (i.e. n!/((n-i)!i!)) -- it 
+		// will take too long for large sizes 
+		if (n == 1) //1C1 and 1C0 are always 1
+			return 1;
+		else if (i == 0)//nC0 are always 1
+			return 1;
+		else if (i == n)//nCn are always 1
+			return 1;
+		else
+			//return take(n - 1, i - 1) + take(n - 1, i);
+			//using the recursion formula:nCr = (n-1)C(r-1)+(n-1)C(r)
+			return n*take(n - 1, i - 1) / i;
+		//this is another recursion method, which is more efficient
+		//in this part, using the memoization method (in assignment 5),
+		//efficiency will increase a lot
+		// if you have limit in running time
+		//I can hand you another version of this function using memoization, if you wish
+	}
+
+	// this routine implements the probability that Alice has more 
+	// heads than Bob after n-many coin tosses
+	double theoretical_value(double q, double p, int n)
+	{
+		// implement equation 1.1 of Addona-Wagon-Wilf paper
+		double sum_r = 0;
+		double sum_s;
+		for (int r = 0; r <= n - 1; r++)
+		{
+			sum_s = 0;
+			for (int s = r + 1; s <= n; s++)
+				sum_s += take(n, s)*pow(q, s)*pow(1 - q, n - s);
+			sum_r += take(n, r)*pow(p, r)*pow(1 - p, n - r)*sum_s;
+		}//equations derived from the reference
+		return sum_r;
+	}
+public:
+	// public function: 
+	void set_probability(double alice_p, double bob_p)
+	{
+		alice_probability = alice_p;
+		bob_probability = bob_p;
+	}
+
+	// probability of Alice winning the game.
+	double simulated_value(int number_of_coin_tosses_in_each_game, int no_of_trials)
+	{
+		int no_of_wins_for_alice = 0;
+		for (int i = 0; i < no_of_trials; i++)
+		{
+			int number_of_heads_for_alice = 0;
+			int number_of_heads_for_bob = 0;
+			for (int j = 0; j < number_of_coin_tosses_in_each_game; j++)
+			{
+				if (get_uniform() < alice_probability)
+					number_of_heads_for_alice++;
+				if (get_uniform() < bob_probability)
+					number_of_heads_for_bob++;
+			}
+			if (number_of_heads_for_alice > number_of_heads_for_bob)
+				no_of_wins_for_alice++;
+		}
+		return (((double)no_of_wins_for_alice) / ((double)no_of_trials));
+	}
+
+	int search_result()
+	{
+		// implememt a discrete-search procedure for the optimal n-value. 
+		// start with n = 1 and find the discrete-value of n that has 
+		// the largest probability for Alice winning.  Why would this work?
+		// See Theorem 2.2 of the paper for the reason!
+		double opt_val = theoretical_value(alice_probability, bob_probability, 1);
+		int opt_n = 1;
+		for (int n = 2;; n++)
+		{
+			if (theoretical_value(alice_probability, bob_probability, n) > opt_val)
+			{
+				opt_val = theoretical_value(alice_probability, bob_probability, n);
+				opt_n = n;
+				//using the property in theorm 2.2, the value must first increase and then decrese, 
+				//so we need to find the first one whose value not increase
+			}
+			else
+				break;//if have found, break the loop
+		}
+		return opt_n;
+	}
+	void get_val(int num, int trial)
+	{
+		for (int i = 1; i <= num; i++)
+		{
+			theo_val[i - 1] = theoretical_value(alice_probability, bob_probability, i);
+			simu_val[i - 1] = simulated_value(i, trial);
+		}
+	}
+	void output_data(char* file_name, int num)
+	{
+		ofstream output_file(file_name);
+		output_file << "theo:" << endl;//output part1: theoratical value of first N numbers
+		for (int i = 1; i <= num; i++)
+			output_file << theo_val[i - 1] << endl;
+		output_file << "simu:" << endl;
+		for (int i = 1; i <= num; i++)//output part2: simulation value of first N numbers 
+			output_file << simu_val[i - 1] << endl;
+	}
+};
+#endif
+
