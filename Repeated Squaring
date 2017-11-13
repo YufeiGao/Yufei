@@ -1,0 +1,118 @@
+// IE523: Financial Computation
+// Written by Prof. R.S. Sreenivas
+// Finished by Yufei Gao
+#define _CRT_SECURE_NO_DEPRECATE
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <fstream>
+#include <cstdlib>
+#include <algorithm>
+#include "D:\Study_UIUC\vc_doc\newmat11\newmat.h"
+#include "D:\Study_UIUC\vc_doc\newmat11\newmatap.h"  
+#include "D:\Study_UIUC\vc_doc\newmat11\newmatio.h"
+using namespace std;
+class Squaring {
+	Matrix B;
+	Matrix repeated_squaring(Matrix A, int exponent, int no_rows) //function to realize the repeated squre method
+	{
+		if (0 == exponent)
+			return IdentityMatrix(no_rows); // when exponent = 0, return identity matrix
+		if ((exponent % 2) == 1) 
+			return (A*repeated_squaring(A*A, (exponent - 1) / 2, no_rows)); //when exponent is an odd number
+		else
+			return (repeated_squaring(A*A, exponent / 2, no_rows));//when exponent is an even number
+	}
+	Matrix brute_multiplication(Matrix A, int exponent, int no_rows) //function to realize the direct method
+	{
+		Matrix C(no_rows, no_rows);
+		C = A;
+		for (int i = 1; i < exponent; i++)
+			C = A*C;
+		return C;
+	}
+public:
+	void squaring_output(Matrix A, int exponent, int no_rows) // function to count time for repeated squaring method
+	{
+		clock_t begin_time = clock();
+		float diff;
+		B = repeated_squaring(A, exponent, no_rows);
+		clock_t time_after = clock();
+		diff = ((float)time_after - (float)begin_time);
+		cout << "This is the repeated square method:" << endl;
+		cout << "The exponent = " << exponent << endl;
+		cout << "The number of rows and columns of the matrix = " << no_rows << endl;
+		cout << "it took " <<(float)diff / CLOCKS_PER_SEC << " second to complete" << endl;
+		cout << "Here is the result:" << endl;
+		for (int i = 1; i <= no_rows; i++)
+		{
+			for (int j = 1; j <= no_rows; j++)
+				cout << setw(20) << B(i, j);
+			cout << endl;
+		}
+	}
+	void brute_output(Matrix A, int exponent, int no_rows) //function to count time for the direct method
+	{
+		clock_t begin_time = clock();
+		float diff;
+		B = brute_multiplication(A, exponent, no_rows);
+		clock_t time_after = clock();
+		diff = ((float)time_after - (float)begin_time);
+		cout << "This is the direct multiplication method:" << endl;
+		cout << "The exponent = " << exponent << endl;
+		cout << "The number of rows and columns of the matrix = " << no_rows << endl;
+		cout << "it took " << (float)diff / CLOCKS_PER_SEC << " second to complete" << endl;
+		cout << "Here is the result:" << endl;
+		for (int i = 1; i <= no_rows; i++)
+		{
+			for (int j = 1; j <= no_rows; j++)
+				cout << setw(20) << B(i, j);
+			cout << endl;
+		}
+	}
+	void plot(Matrix A, int no_rows) //function to plot time for both method
+	{
+		float diff;
+		clock_t begin_time, time_after;
+		ofstream output_file("file_matrix");
+		output_file << "direct method:" << endl;
+		for (int i = 1; i <= 1000; i++) // count the time when exponent <= 1000
+		{
+			begin_time = clock();
+			B = brute_multiplication(A, i, no_rows);
+			time_after = clock();
+			diff = ((float)time_after - (float)begin_time) / CLOCKS_PER_SEC;
+			output_file << (float)diff << endl;
+		}
+		output_file << "repeated square:" << endl;
+		for (int i = 1; i <= 1000; i++)// count the time when exponent <= 1000
+		{
+			begin_time = clock();
+			B = repeated_squaring(A, i, no_rows);
+			time_after = clock();
+			diff = ((float)time_after - (float)begin_time) / CLOCKS_PER_SEC;
+			output_file << (float)diff << endl;
+		}
+	}
+};
+int main(int argc, char* argv[]) {
+	Squaring x;
+	int no_of_rows, exponent;
+	sscanf_s(argv[1], "%d", &exponent);
+	sscanf_s(argv[2], "%d", &no_of_rows);
+	Matrix A(no_of_rows, no_of_rows);
+	for (int i = 1; i <= no_of_rows; i++)
+		for (int j = 1; j <= no_of_rows; j++)
+			A(i, j) = 10*(((double)rand()) / RAND_MAX)-5; // build a random matrix with entries in (-5,5)
+	cout << "Here is the original matrix:" << endl;
+	for (int i = 1; i <= no_of_rows; i++)
+	{
+		for (int j = 1; j <= no_of_rows; j++)
+			cout << setw(10) << A(i, j);
+		cout << endl;
+	}
+	x.squaring_output(A, exponent, no_of_rows);
+	x.brute_output(A, exponent, no_of_rows);
+	x.plot(A, no_of_rows); //this part may took quite a long time
+}
+
