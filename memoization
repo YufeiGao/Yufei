@@ -1,0 +1,46 @@
+#ifndef	CARDGAME_H
+#define CARDGAME_H
+#include<iostream>
+#include <algorithm>
+#include <vector>
+using namespace  std;
+class card_game {
+	vector <vector <double>> card_table;
+public:
+	card_game(int red, int black)
+	{
+		for (int i = 0; i <= red; i++)
+		{
+			vector <double> pre;
+			card_table.push_back(pre);
+		}
+		for (int i = 0; i <= red; i++)
+			for (int j = 0; j <= black; j++)
+				card_table[i].push_back(-1); // initialization the vector table
+	}
+	double value(int r, int b)
+	{
+		if (0 == r)
+		{
+			card_table[r][b] = (double)b;
+			return ((double)b);
+		}
+		if (0 == b)
+		{
+			card_table[r][b] = 0;
+			return (0);
+		}
+		if (card_table[r][b] > 0)
+			return (card_table[r][b]);
+		else
+		{
+			double temp;
+			double term1 = ((double)r / (r + b)) * value(r - 1, b);
+			double term2 = ((double)b / (r + b)) * value(r, b - 1);
+			temp = max((term1 + term2), (double)(b - r));
+			card_table[r][b] = temp;
+			return temp;
+		}
+	}
+};
+#endif
