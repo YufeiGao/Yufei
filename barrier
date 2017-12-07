@@ -1,0 +1,127 @@
+// Simulating a random walk
+// Written by Prof. Sreenivas for IE523: Financial Computing
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <fstream>
+#include <cstdlib>
+#include <algorithm>
+using namespace std;
+
+double risk_free_rate, initial_stock_price, expiration_time, volatility, barrier_price, strike_price, call_option_price = 0.0, put_option_price = 0.0;
+int no_of_trials, no_of_divisions;
+
+double get_uniform()
+{
+	return (((double)rand()) / RAND_MAX);
+}
+double max(double a, double b) {
+	return (b < a) ? a : b;
+}
+int main(int argc, char* argv[])
+{
+	sscanf_s(argv[1], "%lf", &expiration_time);
+	sscanf_s(argv[2], "%lf", &risk_free_rate);
+	sscanf_s(argv[3], "%lf", &volatility);
+	sscanf_s(argv[4], "%lf", &initial_stock_price);
+	sscanf_s(argv[5], "%lf", &strike_price);
+	sscanf_s(argv[6], "%d", &no_of_trials);
+	sscanf_s(argv[7], "%d", &no_of_divisions);
+	sscanf_s(argv[8], "%lf", &barrier_price);
+	double delta_T = expiration_time / ((double)no_of_divisions);
+	double delta_R = (risk_free_rate - 0.5*pow(volatility, 2))*delta_T;
+	double delta_SD = volatility*sqrt(delta_T);
+	
+	double call_value_S1;
+	double call_value_S2;
+	double call_value_S3;
+	double call_value_S4;
+	double put_value_S1;
+	double put_value_S2;
+	double put_value_S3;
+	double put_value_S4;
+
+	for (int i = 1; i <= no_of_trials; i++)
+	{
+		double S1 = initial_stock_price;
+		double S2 = initial_stock_price;
+		double S3 = initial_stock_price;
+		double S4 = initial_stock_price;
+		for (int j = 0; j < no_of_divisions; j++)
+		{
+			double x = get_uniform();
+			double y = get_uniform();
+			double a = sqrt(-2.0*log(x)) * cos(6.283185307999998*y);
+			double b = sqrt(-2.0*log(x)) * sin(6.283185307999998*y);
+			if (S1 <= barrier_price)
+				S1 = 0.0;
+			else
+				S1 = S1*exp(delta_R + delta_SD*a);
+			if (S2 <= barrier_price)
+				S2 = 0.0;
+			else
+				S2 = S2*exp(delta_R - delta_SD*a);
+			if (S3 <= barrier_price)
+				S3 = 0.0;
+			else
+				S3 = S3*exp(delta_R + delta_SD*b);
+			if (S4 <= barrier_price)
+				S4 = 0.0;
+			else
+				S4 = S4*exp(delta_R - delta_SD*b);
+		}
+		if (S1 <= barrier_price)
+		{
+			call_value_S1 = 0.0;
+			put_value_S1 = 0.0;
+		}
+		else
+		{
+			call_value_S1 = max(0.0, S1 - strike_price);
+			put_value_S1 = max(0.0, strike_price - S1);
+		}
+		if (S2 <= barrier_price)
+		{
+			call_value_S2 = 0.0;
+			put_value_S2 = 0.0;
+		}
+		else
+		{
+			call_value_S2 = max(0.0, S2 - strike_price);
+			put_value_S2 = max(0.0, strike_price - S2);
+		}
+		if (S3 <= barrier_price)
+		{
+			call_value_S3 = 0.0;
+			put_value_S3 = 0.0;
+		}
+		else
+		{
+			call_value_S3 = max(0.0, S3 - strike_price);
+			put_value_S3 = max(0.0, strike_price - S3);
+		}
+		if (S4 <= barrier_price)
+		{
+			call_value_S4 = 0.0;
+			put_value_S4 = 0.0;
+		}
+		else
+		{
+			call_value_S4 = max(0.0, S4 - strike_price);
+			put_value_S4 = max(0.0, strike_price - S4);
+		}
+		call_option_price += ((call_value_S1 + call_value_S2 + call_value_S3 + call_value_S4)/ 4.0);
+		put_option_price += ((put_value_S1 + put_value_S2 + put_value_S3 + put_value_S4) / 4.0);
+	}
+	call_option_price = exp(-risk_free_rate*expiration_time)*(call_option_price / ((double)no_of_trials));
+	put_option_price = exp(-risk_free_rate*expiration_time)*(put_option_price / ((double)no_of_trials));
+	cout << "--------------------------------" << endl;
+	cout << "Expiration Time (Years) = " << expiration_time << endl;
+	cout << "Risk Free Interest Rate = " << risk_free_rate << endl;
+	cout << "Volatility (%age of stock value) = " << volatility * 100 << endl;
+	cout << "Initial Stock Price = " << initial_stock_price << endl;
+	cout << "Number of Steps/Divisions in the sample path = " << no_of_divisions << endl;
+	cout << "--------------------------------" << endl;
+	cout << "The average Call Price is " << call_option_price << endl;
+	cout << "The average Put Price is " << put_option_price << endl;
+}
