@@ -1,0 +1,136 @@
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <fstream>
+#include <cstdlib>
+#include <algorithm>
+#include <math.h>
+#include <random>
+
+using namespace std;
+int seed = 5;
+std::default_random_engine generator(seed);
+double get_uniform() // uniform generator
+{
+	std::uniform_real_distribution <double> distribution(0.0, 1.0);
+	double number = distribution(generator);
+	return (number);
+}
+double max(double a, double b) {
+	return (b < a) ? a : b;
+}
+double gaussrand()
+{
+	double U1, U2;
+	double pi = 3.1415926;
+	U1 = get_uniform();
+	U2 = get_uniform();
+	double R = -2 * log(U1);
+	double V = 2 * pi * U2;
+	return sqrt(R)*cos(V);
+}
+int main() {
+	// Q4
+	double mu = 0.1;
+	double sigma = 0.15;
+	double S0 = 15;
+	double K = 16;
+	double T = 1;
+	double h = 1.0 / 24.0;
+	double S_now;
+	vector <double> S;
+	S.push_back(S0);
+	for (int i = 1; i <= 24; i++) // exact algo
+	{
+		S_now = S[i - 1] * exp((mu - 0.5*sigma*sigma)*h + sigma*sqrt(h)*gaussrand());
+		S.push_back(S_now);
+	}
+	for (int i = 0; i <= 24; i++)
+	{
+		cout << S[i] << endl;
+	}
+	system("pause");
+
+	//(b)
+	double sum_call = 0.0;
+	double sum_put = 0.0;
+	double S_simu = 0.0;
+	double S_asian = 0.0;
+	double sum_asian = 0.0;
+	for (int n = 1; n <= 10000; n++) // monte simulation
+	{
+		S.clear();
+		S.push_back(S0);
+		for (int i = 1; i <= 24; i++)
+		{
+			S_now = S[i - 1] * exp((mu - 0.5*sigma*sigma)*h + sigma*sqrt(h)*gaussrand());
+			S.push_back(S_now);
+		}
+		sum_call += max(S[24] - K,0.0); // expected payoff
+		sum_put += max(K - S[24], 0.0);
+	}
+	double call, put, asian_call;
+	call = sum_call/10000.0;
+	put = sum_put/10000.0;
+	cout << call << " " << put << endl;
+	system("pause");
+
+	//variance
+	double var_call = 0.0;
+	double var_put = 0.0;
+	for (int n = 1; n <= 10000; n++) // monte simulation
+	{
+		S.clear();
+		S.push_back(S0);
+		for (int i = 1; i <= 24; i++)
+		{
+			S_now = S[i - 1] * exp((mu - 0.5*sigma*sigma)*h + sigma*sqrt(h)*gaussrand());
+			S.push_back(S_now);
+		}
+		var_call += pow((max(S[24] - K, 0.0)-call),2.0); // expected payoff
+		var_put += pow((max(K - S[24], 0.0)-put),2.0);
+	}
+	var_call = var_call / (10000 * 9999);
+	var_put = var_put / (10000 * 9999);
+	cout << var_call << " " << var_put << endl;
+	system("pause");
+	//(c)
+	for (int n = 1; n <= 10000; n++)
+	{
+		S.clear();
+		S.push_back(S0);
+		S_asian = 0;
+		for (int i = 1; i <= 24; i++)
+		{
+			S_now = S[i - 1] * exp((mu - 0.5*sigma*sigma)*h + sigma*sqrt(h)*gaussrand());
+			S.push_back(S_now);
+			S_asian += S_now;
+		}
+		S_asian = S_asian / 24.0;
+		sum_asian += max(S_asian - K, 0.0); // asian payoff
+		
+	}
+	asian_call = sum_asian / 10000.0;
+	cout << asian_call;
+	system("pause");
+	//variance
+	double var_asian = 0;
+	for (int n = 1; n <= 10000; n++)
+	{
+		S.clear();
+		S.push_back(S0);
+		S_asian = 0;
+		for (int i = 1; i <= 24; i++)
+		{
+			S_now = S[i - 1] * exp((mu - 0.5*sigma*sigma)*h + sigma*sqrt(h)*gaussrand());
+			S.push_back(S_now);
+			S_asian += S_now;
+		}
+		S_asian = S_asian / 24.0;
+		var_asian += pow((max(S_asian - K, 0.0)-asian_call),2.0); // asian payoff
+
+	}
+	var_asian = var_asian / (10000.0*9999);
+	cout << var_asian;
+	system("pause");
+}
